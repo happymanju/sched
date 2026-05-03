@@ -69,7 +69,7 @@ func Run(args []string) int {
 
 	for isRunning {
 		fmt.Println(s.ToString())
-		fmt.Println("(a) add events | (d) delete event | (s) save schedule to text | (b) save to binary| (l) load | (q) quit")
+		fmt.Println("(a) add events | (t) change start time | (d) delete event | (s) save schedule to text | (b) save to binary| (l) load | (q) quit")
 		sc.Scan()
 		input := sc.Text()
 
@@ -78,6 +78,21 @@ func Run(args []string) int {
 			addEvents(&s)
 			s.Calc()
 			continue
+		case "t":
+			fmt.Print("hour >> ")
+			sc.Scan()
+			newHour := sc.Text()
+			fmt.Print("minutes >> ")
+			sc.Scan()
+			newMin := sc.Text()
+			newDate, err := sched.ParseISO(args[0], args[1], args[3], newHour, newMin)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			s.StartDatetimeFromCommandArgs = newDate
+			s.Calc()
+
 		case "d":
 			fmt.Print("delete index: ")
 			sc.Scan()
