@@ -18,7 +18,7 @@ type Event struct {
 }
 
 func (e Event) ToString() string {
-	return fmt.Sprintf("%s\t%s\t%s\t%d", e.Name, e.StartTime.Format("15:04"), e.EndTime.Format("15:04"), e.Duration)
+	return fmt.Sprintf("%s\t%s\t%s\t%d", e.Name, e.StartTime.Format("15:04"), e.EndTime.Format("15:04"), int(e.Duration.Minutes()))
 }
 
 type Schedule struct {
@@ -86,11 +86,18 @@ func (s *Schedule) ToString() string {
 func (s *Schedule) Calc() {
 	if len(s.Events) == 0 {
 		return
+	} else if len(s.Events) == 1 {
+		s.Events[0].StartTime = s.StartDatetimeFromCommandArgs
+		s.Events[0].EndTime = s.Events[0].StartTime.Add(s.Events[0].Duration)
+		return
 	}
+
 	s.Events[0].StartTime = s.StartDatetimeFromCommandArgs
-	for k, v := range s.Events {
-		v.EndTime = v.StartTime.Add(v.Duration)
-		s.Events[k] = v
+	s.Events[0].EndTime = s.Events[0].StartTime.Add(s.Events[0].Duration)
+
+	for i := 1; i < len(s.Events); i++ {
+		s.Events[i].StartTime = s.Events[i-1].EndTime
+		s.Events[i].EndTime = s.Events[i].StartTime.Add(s.Events[i].Duration)
 	}
 }
 
