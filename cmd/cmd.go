@@ -50,7 +50,42 @@ func editEvent(idx int, s *sched.Schedule) {
 
 }
 
-func insertEvent() {
+func insertEvent(s *sched.Schedule, sc *bufio.Scanner) {
+	fmt.Print("insert event name: ")
+	sc.Scan()
+	name := sc.Text()
+	if name == "" {
+		return
+	}
+	fmt.Print("insert event duration: ")
+	sc.Scan()
+	dur, err := time.ParseDuration(sc.Text() + "m")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	newEvent := sched.Event{
+		Name:     name,
+		Duration: dur,
+	}
+	var idx int
+
+	for {
+		fmt.Print("index to insert at: ")
+		sc.Scan()
+		idx, err = strconv.Atoi(sc.Text())
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		break
+	}
+
+	err = s.Insert(idx, newEvent)
+	if err != nil {
+		log.Println(err)
+	}
+
 	return
 }
 
@@ -69,13 +104,17 @@ func Run(args []string) int {
 
 	for isRunning {
 		fmt.Println(s.ToString())
-		fmt.Println("(a) add events | (t) change start time | (d) delete event | (s) save schedule to text | (b) save to binary| (l) load | (q) quit")
+		fmt.Println("(a) add events | (i) insert event | (t) change start time | (d) delete event | (s) save schedule to text | (b) save to binary| (l) load | (q) quit")
 		sc.Scan()
 		input := sc.Text()
 
 		switch input {
 		case "a":
 			addEvents(&s)
+			s.Calc()
+			continue
+		case "i":
+			insertEvent(&s, sc)
 			s.Calc()
 			continue
 		case "t":
@@ -92,7 +131,7 @@ func Run(args []string) int {
 			}
 			s.StartDatetimeFromCommandArgs = newDate
 			s.Calc()
-
+			continue
 		case "d":
 			fmt.Print("delete index: ")
 			sc.Scan()

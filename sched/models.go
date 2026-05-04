@@ -18,7 +18,7 @@ type Event struct {
 }
 
 func (e Event) ToString() string {
-	return fmt.Sprintf("%s\t%s\t%s\t%d", e.Name, e.StartTime.Format("15:04"), e.EndTime.Format("15:04"), int(e.Duration.Minutes()))
+	return fmt.Sprintf("%s,%s,%s,%d", e.Name, e.StartTime.Format("15:04"), e.EndTime.Format("15:04"), int(e.Duration.Minutes()))
 }
 
 type Schedule struct {
@@ -62,23 +62,18 @@ func (s *Schedule) DeleteEvent(idx int) {
 	}
 }
 
-func (s *Schedule) InsertBefore(idx int, e Event) error {
-	if idx-1 < 0 || idx-1 > len(s.Events)-1 {
-		return errors.New("index not valid to insert event")
+func (s *Schedule) Insert(idx int, e Event) error {
+	if idx < 0 || idx > len(s.Events) {
+		return errors.New("index out of range")
 	}
-	newEvents := []Event{e}
-	if idx-1 == 0 {
-		s.Events = append(newEvents, s.Events...)
-	} else {
-		s.Events = slices.Insert(s.Events, idx-1, e)
-	}
+	s.Events = slices.Insert(s.Events, idx, e)
 	return nil
 }
 
 func (s *Schedule) ToString() string {
 	printedSched := ""
 	for k, v := range s.Events {
-		printedSched += fmt.Sprintf("%d\t%s\n", k, v.ToString())
+		printedSched += fmt.Sprintf("%d,%s\n", k, v.ToString())
 	}
 	return printedSched
 }
