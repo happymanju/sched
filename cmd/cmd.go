@@ -86,18 +86,25 @@ func insertEvent(s *sched.Schedule, sc *bufio.Scanner) {
 		log.Println(err)
 	}
 
-	return
 }
 
 func Run(args []string) int {
-	isRunning := true
-	dateFromArgs, err := sched.ParseISO(args[0], args[1], args[3], args[4], args[5])
+	var newDate time.Time = time.Now()
+	var err error
+	hour, err := strconv.Atoi(args[0])
 	if err != nil {
-		log.Println(err)
+		hour = 9
 	}
+	minute, err := strconv.Atoi(args[1])
+	if err != nil {
+		minute = 0
+	}
+	newDate = time.Date(newDate.Year(), newDate.Month(), newDate.Day(), hour, minute, 0, 0, time.Local)
+
+	isRunning := true
 
 	s := sched.Schedule{
-		StartDatetimeFromCommandArgs: dateFromArgs,
+		StartDatetimeFromCommandArgs: newDate,
 	}
 
 	sc := bufio.NewScanner(os.Stdin)
@@ -145,6 +152,12 @@ func Run(args []string) int {
 		case "s":
 			s.SaveToString(sched.MakeTimestamp() + ".txt")
 			continue
+		case "b":
+			err = s.Save()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 		case "l":
 			err := s.Load()
 			if err != nil {
