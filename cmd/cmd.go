@@ -18,28 +18,14 @@ func clearScreen() {
 func Run(args []string) int {
 	var newDate time.Time = time.Now()
 	var err error
-	if len(args) < 2 {
-		return 1
-	}
-	hour, err := strconv.Atoi(args[0])
-	if err != nil {
-		log.Println("error parsing hour")
-		hour = 9
-	}
-	minute, err := strconv.Atoi(args[1])
-	if err != nil {
-		log.Println("error parsing minute")
-		minute = 0
-	}
-	newDate = time.Date(newDate.Year(), newDate.Month(), newDate.Day(), hour, minute, 0, 0, time.Local)
+	sc := bufio.NewScanner(os.Stdin)
+	newDate = time.Date(newDate.Year(), newDate.Month(), newDate.Day(), 9, 0, 0, 0, time.Local)
 
 	isRunning := true
 
 	s := sched.Schedule{
 		StartDatetimeFromCommandArgs: newDate,
 	}
-
-	sc := bufio.NewScanner(os.Stdin)
 
 	for isRunning {
 		clearScreen()
