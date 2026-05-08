@@ -11,92 +11,24 @@ import (
 	"github.com/happymanju/sched/sched"
 )
 
-func addEvents(s *sched.Schedule) {
-	sc := bufio.NewScanner(os.Stdin)
-
-	for {
-		err := s.AddEvent()
-		if err != nil {
-			log.Println(err)
-		}
-		fmt.Print("add another? (n) >> ")
-		sc.Scan()
-		if sc.Text() == "n" {
-			break
-		}
-	}
-}
-
-func editEvent(idx int, s *sched.Schedule) {
-	sc := bufio.NewScanner(os.Stdin)
-	fmt.Print("new name? (Enter to keep): ")
-	sc.Scan()
-	name := sc.Text()
-	fmt.Print("new duration? (Enter to keep): ")
-	sc.Scan()
-	dur := sc.Text()
-	if name != "" {
-		s.Events[idx].Name = name
-	}
-
-	if dur != "" {
-		parsedDuration, err := time.ParseDuration(dur + "m")
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		s.Events[idx].Duration = parsedDuration
-	}
-
-}
-
-func insertEvent(s *sched.Schedule, sc *bufio.Scanner) {
-	fmt.Print("insert event name: ")
-	sc.Scan()
-	name := sc.Text()
-	if name == "" {
-		return
-	}
-	fmt.Print("insert event duration: ")
-	sc.Scan()
-	dur, err := time.ParseDuration(sc.Text() + "m")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	newEvent := sched.Event{
-		Name:     name,
-		Duration: dur,
-	}
-	var idx int
-
-	for {
-		fmt.Print("index to insert at: ")
-		sc.Scan()
-		idx, err = strconv.Atoi(sc.Text())
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		break
-	}
-
-	err = s.Insert(idx, newEvent)
-	if err != nil {
-		log.Println(err)
-	}
-
+func clearScreen() {
+	fmt.Println("\033[2J\033[H")
 }
 
 func Run(args []string) int {
 	var newDate time.Time = time.Now()
 	var err error
+	if len(args) < 2 {
+		return 1
+	}
 	hour, err := strconv.Atoi(args[0])
 	if err != nil {
+		log.Println("error parsing hour")
 		hour = 9
 	}
 	minute, err := strconv.Atoi(args[1])
 	if err != nil {
+		log.Println("error parsing minute")
 		minute = 0
 	}
 	newDate = time.Date(newDate.Year(), newDate.Month(), newDate.Day(), hour, minute, 0, 0, time.Local)
@@ -110,6 +42,7 @@ func Run(args []string) int {
 	sc := bufio.NewScanner(os.Stdin)
 
 	for isRunning {
+		clearScreen()
 		fmt.Println(s.ToString())
 		fmt.Println("(a) add events | (i) insert event | (t) change start time | (d) delete event | (s) save schedule to text | (b) save to binary| (l) load | (q) quit")
 		sc.Scan()
@@ -125,29 +58,10 @@ func Run(args []string) int {
 			s.Calc()
 			continue
 		case "t":
-			fmt.Print("hour >> ")
-			sc.Scan()
-			newHour := sc.Text()
-			fmt.Print("minutes >> ")
-			sc.Scan()
-			newMin := sc.Text()
-			newDate, err := sched.ParseISO(args[0], args[1], args[3], newHour, newMin)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			s.StartDatetimeFromCommandArgs = newDate
-			s.Calc()
+			handleTimeChange(&s, sc)
 			continue
 		case "d":
-			fmt.Print("delete index: ")
-			sc.Scan()
-			deleteInput, err := strconv.Atoi(sc.Text())
-			if err != nil {
-				fmt.Println("Not a valid event index")
-			}
-			s.DeleteEvent(deleteInput)
-			s.Calc()
+			handleDelete(&s, sc)
 			continue
 		case "s":
 			s.SaveToString(sched.MakeTimestamp() + ".txt")
