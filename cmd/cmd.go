@@ -30,7 +30,7 @@ func Run(args []string) int {
 	for isRunning {
 		clearScreen()
 		fmt.Println(s.ToString())
-		fmt.Println("(a) add events | (i) insert event | (t) change start time | (d) delete event | (s) save schedule to text | (b) save to binary| (l) load | (q) quit")
+		fmt.Println("(a) add events | (i) insert event | (t) change start time | (d) delete event | (s) save schedule to text | (m) to markdown table | (b) save to binary| (l) load | (q) quit")
 		sc.Scan()
 		input := sc.Text()
 
@@ -58,6 +58,11 @@ func Run(args []string) int {
 				log.Println(err)
 				continue
 			}
+		case "m":
+			handleMarkdown(&s)
+			fmt.Print("any key to continue...")
+			sc.Scan()
+			continue
 		case "l":
 			err := s.Load()
 			if err != nil {

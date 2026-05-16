@@ -119,3 +119,7 @@ func handleDelete(s *sched.Schedule, sc *bufio.Scanner) {
 	s.DeleteEvent(deleteInput)
 	s.Calc()
 }
+
+func handleMarkdown(s *sched.Schedule) {
+	fmt.Println(s.ToMarkdown())
+}

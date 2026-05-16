@@ -21,6 +21,10 @@ func (e Event) ToString() string {
 	return fmt.Sprintf("%s,%s,%s,%d", e.Name, e.StartTime.Format("15:04"), e.EndTime.Format("15:04"), int(e.Duration.Minutes()))
 }
 
+func (e Event) ToMarkdown() string {
+	return fmt.Sprintf("| %s - %s | %s | %d min |", e.StartTime.Format("15:04"), e.EndTime.Format("15:04"), e.Name, int(e.Duration.Minutes()))
+}
+
 type Schedule struct {
 	Events                       []Event
 	StartDatetimeFromCommandArgs time.Time
@@ -76,6 +80,14 @@ func (s *Schedule) ToString() string {
 		printedSched += fmt.Sprintf("%d,%s\n", k, v.ToString())
 	}
 	return printedSched
+}
+
+func (s *Schedule) ToMarkdown() string {
+	mkdownTable := "| Time | Event |\n| --- | --- |\n"
+	for _, v := range s.Events {
+		mkdownTable += v.ToMarkdown() + "\n"
+	}
+	return mkdownTable
 }
 
 func (s *Schedule) Calc() {
