@@ -83,7 +83,7 @@ func (s *Schedule) ToString() string {
 }
 
 func (s *Schedule) ToMarkdown() string {
-	mkdownTable := "| Time | Event |\n| --- | --- |\n"
+	mkdownTable := "| Time | Event | Duration |\n| --- | --- |\n"
 	for _, v := range s.Events {
 		mkdownTable += v.ToMarkdown() + "\n"
 	}
